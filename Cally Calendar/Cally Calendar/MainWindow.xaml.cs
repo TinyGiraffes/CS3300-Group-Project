@@ -14,7 +14,7 @@ namespace Cally_Calendar
 
         // Win32 interop
         private delegate IntPtr WndProcDelegate(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam);
-        private WndProcDelegate _wndProcDelegate;
+        private WndProcDelegate? _wndProcDelegate;
         private IntPtr _originalWndProc;
 
         [DllImport("user32.dll")]

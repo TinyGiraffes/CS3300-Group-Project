@@ -1,0 +1,31 @@
+
+
+/* FullCalendar visual overrides */
+
+.fc-toolbar-title {
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif !important;
+    color: navy !important;
+    font-size: 3rem !important;
+}
+
+.fc-col-header-cell-cushion,
+.fc-daygrid-day-number,
+.fc-button {
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif !important;
+    color: navy !important;
+}
+
+.fc-button {
+    background-color: white !important;
+    border-color: navy !important;
+}
+
+    .fc-button:hover {
+        background-color: rgb(208, 255, 253) !important;
+    }
+
+.fc-button-primary:not(:disabled).fc-button-active,
+.fc-button-primary:not(:disabled):active {
+    background-color: navy !important;
+    color: white !important;
+}

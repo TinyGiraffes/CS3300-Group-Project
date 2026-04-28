@@ -1,0 +1,651 @@
+﻿/*Adjusts the spacing of the calendar*/
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-width: 800px;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.Left, .Calendar {
+    flex: 1;
+    padding: 10px;
+}
+
+.Left {
+    background-color: rgb(208, 255, 253);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 10px;
+    gap: 10px;
+    min-width: 300px;
+}
+
+.Calendar {
+    min-width: 400px;
+    background-color: rgb(208, 255, 253);
+    display: flex; /* allows centering */
+    justify-content: center; /* horizontal center */
+    align-items: stretch;
+}
+/*A background box to follow the Calendar*/
+.calendar-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.55);
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    display: flex;
+}
+
+#calendar {
+    flex: 1;
+}
+/*Timer*/
+.timer-container {
+    width: 100%;
+    height: 220px;
+    /* Use the path to background image here */
+    background-image: url('../Background.png');
+    /* These settings ensure the image fits and doesn't repeat */
+    /* This forces the image to stretch to the exact dimensions */
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    color: navy; /* Make label text visible against blue */
+    font-family: sans-serif;
+    /* Horizontal: -10px (Left), Vertical: 10px (Bottom), Blur: 20px, Color: Black with 50% opacity */
+    box-shadow: -10px 10px 20px rgba(0, 0, 0, 0.5);
+    /* Optional: adds a subtle border to make the container "pop" against the shadow */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 300px;
+}
+
+label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#durationInput {
+    width: 40%;
+    padding: 5px;
+    text-align: center;
+}
+
+/* Reduced height to 1/3 (10px) */
+.progress-bar-container {
+    width: 100%;
+    height: 10px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 5px; /* <--- Adds 5 pixels of space below the bar */
+}
+
+#progressBar {
+    width: 100%;
+    height: 100%;
+    background-color: darkslateblue;
+    transition: width 0.1s linear;
+}
+
+    #progressBar.warning {
+        background-color: red;
+    }
+
+.controls {
+    display: flex;
+    gap: 15px;
+}
+
+button {
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+}
+
+.img-btn {
+    position: relative; /* Essential for stacking images */
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 60px; /* Match image width */
+    height: 60px; /* Match image height */
+}
+
+    .img-btn img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transition: opacity 0.2s ease-in-out; /* Smooth fade effect */
+    }
+
+/* Initially, hide the hover image */
+.hover-img {
+    opacity: 0;
+}
+
+/* When hovering: hide base, show hover */
+.img-btn:hover .base-img {
+    opacity: 0;
+}
+
+.img-btn:hover .hover-img {
+    opacity: 1;
+}
+
+/* Optional: Slight "click" feel */
+.img-btn:active {
+    transform: scale(0.95);
+}
+
+.column-left {
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.column-right {
+    width: 77%; /* 420px */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 0;
+    min-width: 25%;
+}
+
+.cursive-text {
+    font-family: "Brush Script MT", cursive;
+    font-size: clamp(2rem, 8vw, 4rem);
+    margin: 0;
+}
+
+.Main-text {
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: clamp(.75rem, 2.5vw, 3rem);
+    margin: 0;
+}
+
+#timeDisplay {
+    font-size: 1.8rem; /* Smaller size */
+    font-weight: 500;
+    color: navy; /* Classic digital green (or keep 'white' for a cleaner look) */
+    background-color: lightcyan; /* Black background for the display box */
+    padding: 5px 15px;
+    border-radius: 4px;
+    font-family: AvidTechnologyNews, monospace; /* Monospace font for a digital clock feel */
+    letter-spacing: 2px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    margin: 5px 0;
+    border: 2px solid #333;
+}
+
+/*Cally Title Container*/
+.Cally-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    /* Use the path to your image here */
+    background-image: url('../Background.png');
+    /* These settings ensure the image fits and doesn't repeat */
+    /* This forces the image to stretch to the exact dimensions */
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+    border-radius: 10px;
+    color: navy; /* Make label text visible against blue */
+    font-family: sans-serif;
+    /* Horizontal: -10px (Left), Vertical: 10px (Bottom), Blur: 20px, Color: Black with 50% opacity */
+    box-shadow: -10px 10px 20px rgba(0, 0, 0, 0.5);
+    /* Optional: adds a subtle border to make the container "pop" against the shadow */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+}
+
+
+/*New Clock*/
+.NewClock-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 90px;
+    /* Use the path to your image here */
+    background-image: url('../Background_Clock.png');
+    /* These settings ensure the image fits and doesn't repeat */
+    /* This forces the image to stretch to the exact dimensions */
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+    border-radius: 10px;
+    color: Black; /* Make label text visible against blue */
+    font-family: sans-serif;
+    /* Horizontal: -10px (Left), Vertical: 10px (Bottom), Blur: 20px, Color: Black with 50% opacity */
+    box-shadow: -10px 10px 20px rgba(0, 0, 0, 0.5);
+    /* Optional: adds a subtle border to make the container "pop" against the shadow */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+/*Container for Calendar Controls*/
+.CallyControls-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    width: auto;
+    padding: 15px;
+    justify-content: center;
+    /* Use the path to your image here */
+    background-image: url('../Background.png');
+    /* These settings ensure the image fits and doesn't repeat */
+    /* This forces the image to stretch to the exact dimensions */
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+    border-radius: 10px;
+    color: navy; /* Make label text visible against blue */
+    font-family: sans-serif;
+    /* Horizontal: -10px (Left), Vertical: 10px (Bottom), Blur: 20px, Color: Black with 50% opacity */
+    box-shadow: -10px 10px 20px rgba(0, 0, 0, 0.5);
+    /* Optional: adds a subtle border to make the container "pop" against the shadow */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    #myClock
+
+{
+    position: relative;
+    display: inline-block;
+    font-family: 'Orbitron', monospace;
+    font-size: 36px;
+    color: rgb(0, 74, 158);
+    background-color: rgb(185, 255, 218);
+    padding: 10px;
+    border-radius: 5px;
+    border: 5px solid rgb(0, 38, 82);
+}
+
+/*Calendar*/
+.fc-toolbar-title {
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif !important;
+    color: navy !important;
+    font-size: 3rem !important;
+}
+
+.fc-col-header-cell-cushion,
+.fc-daygrid-day-number,
+.fc-button {
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif !important;
+    color: navy !important;
+}
+
+.fc-button {
+    background-color: white !important;
+    border-color: navy !important;
+}
+
+    .fc-button:hover {
+        background-color: rgb(208, 255, 253) !important;
+    }
+
+.fc-button-primary:not(:disabled).fc-button-active,
+.fc-button-primary:not(:disabled):active {
+    background-color: navy !important;
+    color: white !important;
+}
+/*End Calendar*/
+
+
+.row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.inputs, .inputs form {
+    width: 100%;
+    padding: 0 5px;
+    box-sizing: border-box;
+}
+
+.form-field {
+    display: block;
+    margin-bottom: 4px;
+    position: relative;
+    width: 100%;
+}
+
+.form-field--is-active .form-field__control::after {
+    border-bottom: 2px solid #b11adc;
+    transform: scaleX(150);
+}
+
+.form-field--is-active .form-field__label,
+.form-field--is-filled .form-field__label {
+    color: #b11adc;
+    font-size: clamp(0.5rem, 1vw, 0.75rem);
+    transform: translateY(clamp(-10px, -1.5vw, -20px));
+}
+
+.form-field__label {
+    display: block;
+    font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+    font-weight: normal;
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+    left: 0;
+    margin: 0;
+    padding: clamp(10px, 1.8vw, 18px) 6px 0;
+    position: absolute;
+    top: 0;
+    transition: all 0.4s;
+    width: 100%;
+}
+
+.form-field__control {
+    background: white;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+    .form-field__control::after {
+        border-bottom: 2px solid #b11adc;
+        bottom: 0;
+        content: "";
+        display: block;
+        left: 0;
+        margin: 0 auto;
+        position: absolute;
+        right: 0;
+        transform: scaleX(0);
+        transition: all 0.4s;
+        width: 1%;
+    }
+
+.form-field__input,
+.form-field__textarea {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid #999;
+    color: #333;
+    display: block;
+    font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+    margin-top: clamp(16px, 2.5vw, 24px);
+    outline: 0;
+    padding: clamp(2px, 0.5vw, 4px) clamp(6px, 1vw, 12px);
+    width: 100%;
+    min-width: 0;
+}
+
+.form-field__textarea {
+    height: auto;
+    min-height: 40px;
+    overflow-y: hidden;
+}
+
+/*The AM/PM buttons were written by AI*/
+.ampm-btn {
+    align-self: flex-end;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+    background: #eee;
+    border: none;
+    border-bottom: 1px solid #999;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    color: #333;
+    margin-bottom: 4px;
+    min-width: 40px;
+    height: auto;
+}
+
+.submit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 120px;
+    justify-content: flex-start;
+    align-items: center;
+    align-self: stretch;
+}
+
+.sub-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    background: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: navy;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.draggable-pool-container {
+    padding: 6px 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+#draggable-pool {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.event-chip {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+    font-size: clamp(0.6rem, 1.2vw, 0.85rem);
+    font-weight: bold;
+    user-select: none;
+    margin: 3px 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: background 0.3s, color 0.3s;
+    min-width: 120px;
+    flex: 1;
+    gap: 4px;
+}
+
+    /* Pending state - grey, not yet valid */
+    .event-chip.pending {
+        background: #ccc;
+        color: #555;
+        cursor: not-allowed;
+    }
+
+    /* Ready state - purple, valid and draggable */
+    .event-chip.ready {
+        background: navy;
+        color: white;
+        cursor: grab;
+    }
+
+.chip-row {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.7rem;
+    font-weight: normal;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+.chip-row-label {
+    font-size: 0.6rem;
+    font-weight: bold;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.chip-row-value {
+    font-size: 0.75rem;
+    font-weight: normal;
+}
+
+.event-chip.ready:active {
+    cursor: grabbing;
+    transform: scale(0.97);
+}
+
+.chip-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.chip-info {
+    font-size: 0.7rem;
+    font-weight: normal;
+    opacity: 0.85;
+    line-height: 1.4;
+}
+
+/*Mouse over tooltip*/
+#event-tooltip {
+    position: fixed;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: navy;
+    color: white;
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+    font-size: 0.85rem;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    z-index: 9999;
+    max-width: 260px;
+    min-width: 140px;
+    cursor: default;
+}
+
+    #event-tooltip .chip-title {
+        font-size: 0.9rem;
+        font-weight: bold;
+        margin-bottom: 4px;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    #event-tooltip .chip-row {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.5;
+    }
+
+    #event-tooltip .chip-row-label {
+        font-size: 0.6rem;
+        font-weight: bold;
+        opacity: 0.7;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    #event-tooltip .chip-row-value {
+        font-size: 0.75rem;
+        font-weight: normal;
+    }
+
+.tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.tooltip-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 0 0 6px;
+    line-height: 1;
+    opacity: 0.8;
+    flex-shrink: 0;
+}
+
+    .tooltip-close-btn:hover {
+        opacity: 1;
+    }
+
+.form-field--is-error .form-field__label {
+    color: #cc0000;
+}
+
+.form-field--is-error .form-field__control::after {
+    border-bottom: 2px solid #cc0000;
+    transform: scaleX(150);
+}
+
+.form-field--is-error .form-field__input,
+.form-field--is-error .form-field__textarea {
+    border-bottom: 1px solid #cc0000;
+    color: #cc0000;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.button-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    border: none;
+}
+
+    .button-link:hover {
+        background-color: #0056b3;
+    }
+

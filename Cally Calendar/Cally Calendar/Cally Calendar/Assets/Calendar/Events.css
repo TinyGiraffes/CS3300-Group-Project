@@ -1,0 +1,301 @@
+
+
+/* Event-chip (draggable preview), Form, and event-tooltip (Mouse-over) styling */
+
+.event-chip {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+    font-size: clamp(0.6rem, 1.2vw, 0.85rem);
+    font-weight: bold;
+    user-select: none;
+    margin: 3px 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: background 0.3s, color 0.3s;
+    min-width: 120px;
+    flex: 1;
+    gap: 4px;
+}
+
+/* Pending state - grey, not yet valid */
+.event-chip.pending {
+    background: #ccc;
+    color: #555;
+    cursor: not-allowed;
+}
+
+/* Ready state - purple, valid and draggable */
+.event-chip.ready {
+    background: navy;
+    color: white;
+    cursor: grab;
+}
+
+.chip-row {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.7rem;
+    font-weight: normal;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+.chip-row-label {
+    font-size: 0.6rem;
+    font-weight: bold;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.chip-row-value {
+    font-size: 0.75rem;
+    font-weight: normal;
+}
+
+.event-chip.ready:active {
+    cursor: grabbing;
+    transform: scale(0.97);
+}
+
+.chip-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.chip-info {
+    font-size: 0.7rem;
+    font-weight: normal;
+    opacity: 0.85;
+    line-height: 1.4;
+}
+
+/* Mouse-over tooltip */
+#event-tooltip {
+    position: fixed;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: navy;
+    color: white;
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+    font-size: 0.85rem;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    z-index: 9999;
+    max-width: 260px;
+    min-width: 140px;
+    cursor: default;
+}
+
+#event-tooltip .chip-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+    word-break: break-word;
+    white-space: normal;
+}
+
+#event-tooltip .chip-row {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.5;
+}
+
+#event-tooltip .chip-row-label {
+    font-size: 0.6rem;
+    font-weight: bold;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#event-tooltip .chip-row-value {
+    font-size: 0.75rem;
+    font-weight: normal;
+}
+
+.tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.tooltip-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 0 0 6px;
+    line-height: 1;
+    opacity: 0.8;
+    flex-shrink: 0;
+}
+
+.tooltip-close-btn:hover {
+    opacity: 1;
+}
+
+/* ===== Event creation form ===== */
+
+.form-field {
+    display: block;
+    margin-bottom: 4px;
+    position: relative;
+    width: 100%;
+}
+
+.form-field--is-active .form-field__control::after {
+    border-bottom: 2px solid #b11adc;
+    transform: scaleX(150);
+}
+
+.form-field--is-active .form-field__label,
+.form-field--is-filled .form-field__label {
+    color: #b11adc;
+    font-size: clamp(0.5rem, 1vw, 0.75rem);
+    transform: translateY(clamp(-10px, -1.5vw, -20px));
+}
+
+.form-field__label {
+    display: block;
+    font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+    font-weight: normal;
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+    left: 0;
+    margin: 0;
+    padding: clamp(10px, 1.8vw, 18px) 6px 0;
+    position: absolute;
+    top: 0;
+    transition: all 0.4s;
+    width: 100%;
+}
+
+.form-field__control {
+    background: white;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+    .form-field__control::after {
+        border-bottom: 2px solid #b11adc;
+        bottom: 0;
+        content: "";
+        display: block;
+        left: 0;
+        margin: 0 auto;
+        position: absolute;
+        right: 0;
+        transform: scaleX(0);
+        transition: all 0.4s;
+        width: 1%;
+    }
+
+.form-field__input,
+.form-field__textarea {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid #999;
+    color: #333;
+    display: block;
+    font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+    margin-top: clamp(16px, 2.5vw, 24px);
+    outline: 0;
+    padding: clamp(2px, 0.5vw, 4px) clamp(6px, 1vw, 12px);
+    width: 100%;
+    min-width: 0;
+}
+
+.form-field__textarea {
+    height: auto;
+    min-height: 40px;
+    overflow-y: hidden;
+}
+
+/* Error state — must come after the base .form-field rules */
+.form-field--is-error .form-field__label {
+    color: #cc0000;
+}
+
+.form-field--is-error .form-field__control::after {
+    border-bottom: 2px solid #cc0000;
+    transform: scaleX(150);
+}
+
+.form-field--is-error .form-field__input,
+.form-field--is-error .form-field__textarea {
+    border-bottom: 1px solid #cc0000;
+    color: #cc0000;
+}
+
+/* ===== AM/PM toggle buttons ===== */
+/* (Originally written by AI) */
+.ampm-btn {
+    align-self: flex-end;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    font-family: Calibri, 'Gill Sans', 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+    background: #eee;
+    border: none;
+    border-bottom: 1px solid #999;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    color: #333;
+    margin-bottom: 4px;
+    min-width: 40px;
+    height: auto;
+}
+
+/* ===== Submit button + container ===== */
+
+.submit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 120px;
+    justify-content: flex-start;
+    align-items: center;
+    align-self: stretch;
+}
+
+.sub-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    background: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: navy;
+    margin-top: 10px;
+    width: 100%;
+}
+
+/* ===== Generic button-link ===== */
+
+.button-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #003399;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    border: none;
+}
+
+.button-link:hover {
+    background-color: navy;
+}

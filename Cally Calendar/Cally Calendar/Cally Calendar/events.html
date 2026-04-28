@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Read CSV File</title>
+</head>
+
+<body>
+
+    <pre id="output"></pre>
+
+    <script>
+        if (window.csvData) {
+            console.log(window.csvData);
+                //From here we can parse the CSV
+                //Format: name, start-hour, end-hour, start date, end date, description
+                //Format: name, 0-1440minutes, 0-1440, 1/1/2026,  1/1/2026, description
+                //Note: Time is base 60, so lets just divide it by that later.
+                //If needed, remember to keep the commas consistent for parsing. IE 5 each.
+
+        }
+        
+
+    </script>
+
+</body >
+
+
+</html >

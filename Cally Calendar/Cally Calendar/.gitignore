@@ -1,0 +1,16 @@
+# Ignore .NET build folders
+bin/
+obj/
+
+# Ignore Visual Studio files
+.vs/
+*.user
+*.suo
+
+# Ignore build outputs
+*.exe
+*.dll
+*.pdb
+
+# Ignore WebView2 runtime data
+*.WebView2/

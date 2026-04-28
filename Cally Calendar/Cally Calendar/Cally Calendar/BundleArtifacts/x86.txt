@@ -1,0 +1,1 @@
+MainPackage=C:\Users\Griffin\source\repos\CS_3300_Group_Project\CS_3300_Group_Project\Cally Calendar\Cally Calendar\bin\x86\Debug\net8.0-windows10.0.19041.0\win-x86\Cally Calendar_1.0.1.0_x86_Debug.msix

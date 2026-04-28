@@ -73,7 +73,57 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('chip-info').textContent = '';
         },
 
-        
+
+        // Persist drag-to-reschedule to the CSV. Without this, events visually
+        // move but the underlying csvData is unchanged — the next re-render
+        // (e.g. after adding a new event) snaps them back to the old date.
+        eventDrop: function (info) {
+            const toCsvDate = (iso) => {
+                const [y, m, d] = iso.split('T')[0].split('-');
+                return `${parseInt(m)}/${parseInt(d)}/${y}`;
+            };
+            const oldDate = toCsvDate(info.oldEvent.startStr);
+            const newDate = toCsvDate(info.event.startStr);
+            const dayDiff = Math.round((info.event.start - info.oldEvent.start) / 86400000);
+            const title = info.event.title;
+
+            const lines = window.csvData.split('\n');
+            let updated = false;
+            for (let i = 0; i < lines.length; i++) {
+                const fields = lines[i].split(',');
+                if (fields.length < 5) continue;
+                if (fields[0].trim() === title && fields[3].trim() === oldDate) {
+                    fields[3] = newDate;
+                    // Shift end date by the same number of days so multi-day events keep their span
+                    const endParts = fields[4].trim().split('/');
+                    if (endParts.length === 3) {
+                        const d = new Date(+endParts[2], +endParts[0] - 1, +endParts[1]);
+                        d.setDate(d.getDate() + dayDiff);
+                        fields[4] = `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+                    } else {
+                        fields[4] = newDate;
+                    }
+                    lines[i] = fields.join(',');
+                    updated = true;
+                    break;
+                }
+            }
+
+            if (!updated) {
+                // No matching CSV row — snap the event back so what you see matches what's saved.
+                info.revert();
+                return;
+            }
+
+            window.csvData = lines.join('\n');
+            window.chrome.webview.postMessage(window.csvData);
+
+            // Re-render from updated CSV to stay in sync
+            calendar.getEventSources().forEach(s => s.remove());
+            calendar.addEventSource({ events: parseCSV(window.csvData) });
+        },
+
+
         //Largely written by AI
         eventMouseEnter: function (info) {
             const ev = info.event;
@@ -166,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    // Draggable event chip initialized here 
+    // Draggable event chip initialized here
     new FullCalendar.Draggable(document.getElementById('draggable-pool'), {
         itemSelector: '.event-chip.ready',
         eventData: function (chipEl) {
@@ -285,12 +335,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         window.csvData += newEvent;
 
-        //This changes to the C# main process, which will then write it to the file.
+        //This posts the changes to the C# main process, which will then write it to the file.
         window.chrome.webview.postMessage(window.csvData);
 
         //This removes the old events from the calendar
         calendar.getEventSources().forEach(source => source.remove());
-
 
         const newEvents = parseCSV(window.csvData);
         calendar.addEventSource({ events: newEvents });

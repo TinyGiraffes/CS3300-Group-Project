@@ -1,0 +1,338 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://w3.org">
+<head>
+    <meta charset="utf-8" />
+    <title>Event Manager</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .btn { padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; color: white; }
+        .btn-add { background-color: #003399; }
+        .btn-edit { background-color: #ffc107; color: black; }
+        .btn-delete { background-color: #dc3545; }
+        .btn-clear { background-color: #6c757d; }
+        .btn-danger { background-color: #721c24; }
+        .form-container { border: 1px solid #ccc; padding: 15px; width: 400px; background-color: #fafafa; }
+        label { font-weight: bold; }
+        input, textarea { width: 100%; margin-bottom: 10px; box-sizing: border-box; }
+        /*for printing*/ 
+        @media print {
+            /* Hide the form, header, and all action buttons when printing */
+            .form-container, h2, h3, .btn, label, input, textarea
+
+        {
+            display: none !important;
+        }
+        /* Hide the "Actions" column in the table */
+        th:last-child, td:last-child {
+            display: none !important;
+        }
+        /* Ensure the table takes up the full page width */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        }
+
+    </style>
+</head>
+<body>
+
+    <h2>Event Manager</h2>
+
+    <!-- Form for Adding / Editing Events -->
+    <div class="form-container">
+        <h3 id="formActionHeader">Add New Event</h3>
+        
+        <!-- Hidden field to track if we are editing an existing event -->
+        <input type="hidden" id="originalTitle" value="">
+
+        <label>Title:</label><br>
+        <input type="text" id="formTitle" placeholder="e.g., Doctor Appointment"><br>
+
+        <label>Start Time (12hr):</label><br>
+        <input type="text" id="formStartTime" placeholder="e.g., 3:00 PM"><br>
+
+        <label>End Time (12hr):</label><br>
+        <input type="text" id="formEndTime" placeholder="e.g., 4:00 PM"><br>
+
+        <label>Start Date:</label><br>
+        <input type="date" id="formStartDate"><br>
+
+        <label>End Date:</label><br>
+        <input type="date" id="formEndDate"><br>
+
+        <label>Description:</label><br>
+        <textarea id="formDescription" style="height: 60px;"></textarea><br>
+
+        <!-- Dynamic Action Buttons -->
+        <button id="mainFormBtn" class="btn btn-add" onclick="processForm()">Add Event</button>
+        <button id="cancelEditBtn" class="btn btn-clear" style="display:none;" onclick="resetForm()">Cancel Edit</button>
+    </div>
+
+    <!-- Master Controls -->
+    <div style="margin-top: 20px;">
+        <button class="btn btn-clear" onclick="window.history.back()">Back to Calendar</button>
+        <button class="btn btn-add" onclick="printEvents()">Print Events</button>
+        <button class="btn btn-danger" onclick="deleteAllEvents()" style="float: right;">Delete All Events</button>
+    </div>
+
+    <!-- Table of Events -->
+    <table id="eventsTable">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- JavaScript will populate rows here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Run as soon as the page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            loadTable();
+        });
+
+        // This fixes the race condition in C# WebView2!
+        // This watches for whenever your C# backend updates the window.csvData variable.
+        let lastKnownCsv = window.csvData;
+        setInterval(function () {
+            if (window.csvData !== lastKnownCsv) {
+                lastKnownCsv = window.csvData;
+                console.log("C# backend pushed new data. Reloading table...");
+                loadTable();
+            }
+        }, 300); // Checks every 300 milliseconds
+
+
+        // 1. HELPER: Minutes to 12-Hour
+        function convertTo12Hour(minutesFromMidnight) {
+            if (!minutesFromMidnight) return '';
+            const totalMinutes = parseInt(minutesFromMidnight, 10);
+            let hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+            return `${hours}:${formattedMinutes} ${ampm}`;
+        }
+
+        // 2. HELPER: "MM/DD/YYYY" to "YYYY-MM-DD"
+        function formatToHTMLDate(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.trim().split('/');
+            if (parts.length === 3) {
+                const month = parts[0].padStart(2, '0');
+                const day = parts[1].padStart(2, '0');
+                const year = parts[2];
+                return `${year}-${month}-${day}`;
+            }
+            return '';
+        }
+
+        // 3. HELPER: "YYYY-MM-DD" back to "MM/DD/YYYY"
+        function formatToCSVDate(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                const year = parts[0];
+                const month = parts[1];
+                const day = parts[2];
+                return `${month}/${day}/${year}`;
+            }
+            return dateStr;
+        }
+
+        // 4. HELPER: "3:00 PM" to Minutes
+        function convertToMinutes(timeStr) {
+            if (!timeStr) return 0;
+            timeStr = timeStr.trim().toUpperCase();
+            const isPM = timeStr.includes('PM');
+            const isAM = timeStr.includes('AM');
+            let cleanTime = timeStr.replace('AM', '').replace('PM', '').trim();
+            const parts = cleanTime.split(':');
+            let hours = parseInt(parts[0], 10);
+            const minutes = parts.length > 1 ? parseInt(parts[1], 10) : 0;
+            if (isPM && hours !== 12) hours += 12;
+            if (isAM && hours === 12) hours = 0;
+            return (hours * 60) + minutes;
+        }
+
+        // 5. CORE: Load CSV string into HTML table
+        function loadTable() {
+            const tbody = document.querySelector('#eventsTable tbody');
+            tbody.innerHTML = ''; // Clear existing
+
+            if (!window.csvData || window.csvData.trim() === '') {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No events found.</td></tr>';
+                return;
+            }
+
+            const lines = window.csvData.split('\n');
+            lines.forEach((line, index) => {
+                const trimmed = line.trim();
+                if (trimmed === '') return;
+
+                const fields = trimmed.split(',');
+                if (fields.length < 6) return; // Malformed line safety
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                        <td>${fields[0]}</td>
+                        <td>${convertTo12Hour(fields[1])}</td>
+                        <td>${convertTo12Hour(fields[2])}</td>
+                        <td>${fields[3]}</td>
+                        <td>${fields[4]}</td>
+                        <td>${fields[5]}</td>
+                        <td>
+                            <button class="btn btn-edit" onclick="editRow('${index}')">Edit</button>
+                            <button class="btn btn-delete" onclick="deleteRow('${index}')">Delete</button>
+                        </td>
+                    `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 6. CORE: Handle adding or updating
+        function processForm() {
+            const originalTitle = document.getElementById('originalTitle').value;
+
+            const title = document.getElementById('formTitle').value.trim();
+            const startTime = document.getElementById('formStartTime').value;
+            const endTime = document.getElementById('formEndTime').value;
+            const startDate = document.getElementById('formStartDate').value;
+            const endDate = document.getElementById('formEndDate').value;
+            const description = document.getElementById('formDescription').value.trim();
+
+            if (!title) {
+                alert("The Title field is required!");
+                return;
+            }
+
+            const rawStartTime = convertToMinutes(startTime);
+            const rawEndTime = convertToMinutes(endTime);
+            const csvStartDate = formatToCSVDate(startDate);
+            const csvEndDate = formatToCSVDate(endDate);
+
+            const newLine = `${title},${rawStartTime},${rawEndTime},${csvStartDate},${csvEndDate},${description}`;
+
+            let lines = [];
+            if (window.csvData && window.csvData.trim() !== '') {
+                lines = window.csvData.split('\n').filter(l => l.trim() !== '');
+            }
+
+            if (originalTitle === '') {
+                // ADDING A NEW ROW
+                lines.push(newLine);
+            } else {
+                // EDITING AN EXISTING ROW
+                let foundIndex = -1;
+                for (let i = 0; i < lines.length; i++) {
+                    const fields = lines[i].split(',');
+                    if (fields[0] === originalTitle) {
+                        foundIndex = i;
+                        break;
+                    }
+                }
+                if (foundIndex !== -1) {
+                    lines[foundIndex] = newLine;
+                } else {
+                    alert("Could not find the original record to update.");
+                    return;
+                }
+            }
+
+            window.csvData = lines.join('\n');
+
+            // Update our tracker so the interval doesn't force an extra draw
+            lastKnownCsv = window.csvData;
+
+            window.chrome.webview.postMessage(window.csvData);
+
+            resetForm();
+            loadTable();
+        }
+
+        // 7. CORE: Load a row into the form to be edited
+        function editRow(rowIndex) {
+            const lines = window.csvData.split('\n').filter(l => l.trim() !== '');
+            const fields = lines[rowIndex].split(',');
+
+            // Flip form UI to "Edit Mode"
+            document.getElementById('formActionHeader').textContent = "Edit Event";
+            document.getElementById('mainFormBtn').textContent = "Save Changes";
+            document.getElementById('cancelEditBtn').style.display = "inline-block";
+
+            // Populate Form
+            document.getElementById('originalTitle').value = fields[0]; // Track target row
+            document.getElementById('formTitle').value = fields[0];
+            document.getElementById('formStartTime').value = convertTo12Hour(fields[1]);
+            document.getElementById('formEndTime').value = convertTo12Hour(fields[2]);
+            document.getElementById('formStartDate').value = formatToHTMLDate(fields[3]);
+            document.getElementById('formEndDate').value = formatToHTMLDate(fields[4]);
+            document.getElementById('formDescription').value = fields[5];
+
+            document.getElementById('formTitle').focus();
+        }
+
+        // 8. CORE: Delete an individual row
+        function deleteRow(rowIndex) {
+            const lines = window.csvData.split('\n').filter(l => l.trim() !== '');
+            const fields = lines[rowIndex].split(',');
+
+            if (!confirm(`Are you sure you want to delete '${fields[0]}'?`)) return;
+
+            lines.splice(rowIndex, 1); // Remove the target line
+
+            window.csvData = lines.join('\n');
+            lastKnownCsv = window.csvData; // Update tracker
+
+            window.chrome.webview.postMessage(window.csvData);
+            loadTable();
+        }
+
+        // 9. CORE: Delete everything
+        function deleteAllEvents() {
+            if (!confirm("⚠️ Are you absolutely sure you want to delete ALL events? This cannot be undone.")) return;
+
+            window.csvData = '';
+            lastKnownCsv = ''; // Update tracker
+
+            window.chrome.webview.postMessage(window.csvData);
+            loadTable();
+        }
+
+        // 10. RESET: Clear the form and revert button states
+        function resetForm() {
+            document.getElementById('formActionHeader').textContent = "Add New Event";
+            document.getElementById('mainFormBtn').textContent = "Add Event";
+            document.getElementById('cancelEditBtn').style.display = "none";
+
+            document.getElementById('originalTitle').value = '';
+            document.getElementById('formTitle').value = '';
+            document.getElementById('formStartTime').value = '';
+            document.getElementById('formEndTime').value = '';
+            document.getElementById('formStartDate').value = '';
+            document.getElementById('formEndDate').value = '';
+            document.getElementById('formDescription').value = '';
+        }
+        // 11. PRINT: Opens the browser print dialog
+        function printEvents() {
+            window.print();
+        }
+
+    </script>
+</body>
+</html>

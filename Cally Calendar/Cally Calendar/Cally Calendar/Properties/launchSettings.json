@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Cally Calendar (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Cally Calendar (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
