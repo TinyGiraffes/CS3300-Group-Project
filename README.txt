@@ -15,3 +15,6 @@ Option 2: Open in Visual Studio 2022
 
 We had to clone the Repo because Devon owns the original and we couldn't make it public.
 https://github.com/TinyGiraffes/CS3300-Group-Project
+
+
+Made by Griffin Derr, Jeff Smith, and Bernadette Williamson
